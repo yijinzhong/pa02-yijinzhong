@@ -77,8 +77,9 @@ for (auto& prefix : prefixes) {
         for (auto& m : movies)
             cout << m.name << ", " << fixed << setprecision(1) << m.rating << "\n";
         bestMovies.push_back({prefix, movies[0]});
-    }
-    cout << "\n";
+        cout << "\n";
+}
+    
 }
 
 for (auto& [prefix, m] : bestMovies)
