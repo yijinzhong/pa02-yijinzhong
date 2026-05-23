@@ -96,46 +96,55 @@ for (auto& [prefix, m] : bestMovies)
 /*
  * Part 3a: Time Complexity Analysis
  *
- * For each of the m prefixes:
- *   - Iterate through all n movies to find matches: O(n * l)
- *     (each name comparison costs O(l) in the worst case)
- *   - Push k matching movies into priority queue: O(k log k)
- *   - Pop k movies out: O(k log k)
+ * Assuming all n movies are already stored in the data structure:
  *
- * Per prefix: O(n*l + k*log(k))
- * Total for m prefixes: O(m * (n*l + k*log(k)))
+ * Per query:
+ *   - Hash lookup in unordered_map: O(1)
+ *   - Push at most k matching movies into priority queue: O(k log k)
+ *   - Pop k movies out: O(k log k)
+ * Per query total: O(k log k)
+ * Total for m queries: O(m * k log k)
+ * n and l do not affect query time since we use a precomputed hashmap.
  *
  * Measured runtimes using prefix_large.txt:
- *   input_20_random.csv:    17ms
- *   input_100_random.csv:   36ms
- *   input_1000_random.csv:  227ms
- *   input_76920_random.csv: 19194ms
+ *   input_20_random.csv:    6ms
+ *   input_100_random.csv:   12ms
+ *   input_1000_random.csv:  22ms
+ *   input_76920_random.csv: 2667ms
  *
- * The trend matches O(m*n*l): as n grows ~77x (1000->76920),
- * runtime grows ~84x (227ms->19194ms).
+ * Runtime grows with both m and k. As n increases, more movies
+ * match each prefix on average, so k grows with n. This explains
+ * why runtime grew faster than expected from m alone — the larger
+ * dataset increases k, which increases priority queue operations.
+ * This is consistent with O(m * k log k).
  *
  * Part 3b: Space Complexity Analysis
  *
- * - Storing n movies in vector: O(n * l)
- * - Per query, priority queue holds at most k movies: O(k * l)
- * - m and k do not affect persistent storage.
- * - Overall: O(n * l)
+ * Assuming n movies are already stored in the data structure,
+ * the only extra space used per query is the priority queue.
+ * It holds at most k movies at a time, each with a name of
+ * length at most l, so space per query is O(k * l).
+ * After each query the priority queue is cleared, so m does
+ * not accumulate space across queries.
+ * Overall extra space complexity: O(k * l)
  *
  * Part 3c: Tradeoff
  *
- * This algorithm was designed for correctness first,
- * not specifically for low time or space complexity.
+ * We designed for low time complexity. We used an unordered_map
+ * to precompute all prefix mappings for O(1) lookup, and a priority
+ * queue to retrieve the top k results sorted by rating in O(k log k).
  *
- * Time complexity is O(m*n*l) — not optimal because
- * we scan all n movies for every prefix.
- * The bottleneck is the linear scan: as n grows larger,
- * the runtime grows proportionally, which matches our
- * measured runtimes (n=1000: 227ms, n=76920: 19194ms).
+ * Were you able to achieve a low space complexity as well?
+ * No. The unordered_map stores every prefix of every movie name,
+ * costing O(n * l^2) space during preprocessing.
  *
- * Space complexity is O(n*l) — this is unavoidable
- * since all n movies must be stored.
- *
- * Time complexity was harder to optimize than space complexity.
+ * Why or why not?
+ * To eliminate the linear scan over all n movies per query,
+ * we had to store all prefix mappings upfront. This is a
+ * direct time-space tradeoff: reducing query time from O(n * l)
+ * to O(1) required significantly more preprocessing space.
+ * Low space and low query time cannot both be achieved
+ * with this approach.
  */
 
 
