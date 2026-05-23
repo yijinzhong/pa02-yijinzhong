@@ -2,6 +2,10 @@
 
 void MovieDatabase::insert(const std::string& name, double rating) {
     movies.push_back({name, rating});
+    for (int len = 1; len <= (int)name.size(); len++) {
+        std::string prefix = name.substr(0, len);
+        prefixMap[prefix].push_back({name, rating});
+    }
 }
 
 std::vector<Movie> MovieDatabase::getAllAlphabetical() const {
@@ -25,12 +29,13 @@ std::vector<Movie> MovieDatabase::getMoviesWithPrefix(const std::string& prefix)
         return a.name > b.name;
     };
     std::priority_queue<Movie, std::vector<Movie>, decltype(cmp)> pq(cmp);
-    
-    for (auto& m : movies) {
-        if (m.name.substr(0, prefix.size()) == prefix)
+
+    auto it = prefixMap.find(prefix);
+    if (it != prefixMap.end()) {
+        for (auto& m : it->second)
             pq.push(m);
     }
-    
+
     std::vector<Movie> result;
     while (!pq.empty()) {
         result.push_back(pq.top());
@@ -38,4 +43,3 @@ std::vector<Movie> MovieDatabase::getMoviesWithPrefix(const std::string& prefix)
     }
     return result;
 }
-
